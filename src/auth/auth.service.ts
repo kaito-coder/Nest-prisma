@@ -16,17 +16,24 @@ export class AuthService {
     const hash = await argon.hash(dto.password);
     // save the new user in the db
     try {
-      const user = await this.prismaService.user.create({
-        data: {
-          email: dto.email,
-          hash,
-          address: {
-            create: {
-              street: dto.street,
-              city: dto.city,
-            },
+      const data = {
+        email: dto.email,
+        hash,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        address: undefined,
+      };
+      if (dto.street && dto.city) {
+        data.address = {
+          create: {
+            street: dto.street,
+            city: dto.city,
+            country: dto.country,
           },
-        },
+        };
+      }
+      const user = await this.prismaService.user.create({
+        data,
         include: {
           address: true,
         },
